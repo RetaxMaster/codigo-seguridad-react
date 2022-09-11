@@ -8,9 +8,11 @@ function UseState({ name }) {
         value: "",
         error: false,
         loading: false,
+        deleted: false,
+        confirmed: false,
     });
 
-    const { value, error, loading } = state;
+    const { value, error, loading, deleted, confirmed } = state;
 
     console.log(value);
 
@@ -28,6 +30,7 @@ function UseState({ name }) {
                         ...state,
                         error: false,
                         loading: false,
+                        confirmed: true
                     });
                 }
                 else {
@@ -47,40 +50,89 @@ function UseState({ name }) {
 
     }, [loading]);
 
-    return (
-        <div>
-            <h2>Eliminar {name}</h2>
-            <p>Por favor escribe el código de seguridad.</p>
+    if (!deleted && !confirmed) {
+        return (
+            <div>
+                <h2>Eliminar {name}</h2>
+                <p>Por favor escribe el código de seguridad.</p>
+    
+                {(error && !loading) && (
+                    <p>Error: El código es incorrecto</p>
+                )}
+    
+                {loading && (
+                    <p>Cargando...</p>
+                )}
+    
+                <input 
+                    placeholder="Código de seguridad"
+                    value={value}
+                    onChange={(event) => {
+                        setState({
+                            ...state,
+                            value: event.target.value,
+                        });
+                    }}
+                />
+    
+                <button
+                    onClick={() => {
+                        setState({
+                            ...state,
+                            loading: true,
+                        });
+                    }}
+                >Comprobar</button>
+            </div>
+        );
+    }
+    else if(!!confirmed && !deleted) {
+        return (
+            <React.Fragment>
 
-            {(error && !loading) && (
-                <p>Error: El código es incorrecto</p>
-            )}
+                <p>Pedimos confirmación. ¿Tas seguro?</p>
 
-            {loading && (
-                <p>Cargando...</p>
-            )}
+                <button
+                    onClick={() => {
+                        setState({
+                            ...state,
+                            confirmed: false,
+                            deleted: true,
+                        });
+                    }}
+                >Sí, eliminar.</button>
 
-            <input 
-                placeholder="Código de seguridad"
-                value={value}
-                onChange={(event) => {
-                    setState({
-                        ...state,
-                        value: event.target.value,
-                    });
-                }}
-            />
+                <button
+                    onClick={() => {
+                        setState({
+                            ...state,
+                            confirmed: false,
+                            deleted: false,
+                            value: "",
+                        });
+                    }}
+                >Nop, me arrepentí.</button>
 
-            <button
-                onClick={() => {
-                    setState({
-                        ...state,
-                        loading: true,
-                    });
-                }}
-            >Comprobar</button>
-        </div>
-    );
+            </React.Fragment>
+        );
+    }
+    else {
+        return (
+            <React.Fragment>
+                <p>Eliminado con éxito</p>
+                <button
+                    onClick={() => {
+                        setState({
+                            ...state,
+                            confirmed: false,
+                            deleted: false,
+                            value: "",
+                        });
+                    }}
+                >Resetear, volver atrás.</button>
+            </React.Fragment>
+        );
+    }
 }
 
 export { UseState };
